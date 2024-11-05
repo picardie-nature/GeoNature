@@ -12,7 +12,7 @@ import { DateComponent } from './date.component';
   providers: [{ provide: NgbDateParserFormatter, useClass: NgbDatePeriodParserFormatter }],
 })
 export class PeriodComponent extends DateComponent implements OnInit {
-  public elementRef: ElementRef;
+  //public elementRef: ElementRef;
 
   constructor(
     myElement: ElementRef,

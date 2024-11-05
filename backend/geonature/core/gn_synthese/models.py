@@ -16,7 +16,7 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.sql import select, func, exists
 from sqlalchemy.schema import FetchedValue
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID, JSONB, ARRAY
 from geoalchemy2 import Geometry
 from geoalchemy2.shape import to_shape
 
@@ -588,6 +588,7 @@ class VSyntheseForWebApp(DB.Model):
     id_dataset = DB.Column(DB.Integer)
     dataset_name = DB.Column(DB.String)
     id_acquisition_framework = DB.Column(DB.Integer)
+    organisms = DB.Column(ARRAY(DB.Integer))
     count_min = DB.Column(DB.Integer)
     count_max = DB.Column(DB.Integer)
     cd_nom = DB.Column(DB.Integer)
@@ -648,6 +649,10 @@ class VSyntheseForWebApp(DB.Model):
     name_source = DB.Column(DB.Unicode)
     url_source = DB.Column(DB.Unicode)
     st_asgeojson = DB.Column(DB.Unicode)
+    m5 = DB.Column(Geometry("GEOMETRY", 4326))
+    m10 = DB.Column(Geometry("GEOMETRY", 4326))
+    municipalities = DB.Column(ARRAY(DB.Integer))
+    departements = DB.Column(ARRAY(DB.Integer))
 
     medias = relationship(
         TMedias, primaryjoin=(TMedias.uuid_attached_row == foreign(unique_id_sinp)), uselist=True

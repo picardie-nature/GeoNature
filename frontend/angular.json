@@ -58,7 +58,8 @@
               "node_modules/@circlon/angular-tree-component/src/lib/angular-tree-component.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
-              "node_modules/leaflet.locatecontrol/dist/L.Control.Locate.min.css"
+              "node_modules/leaflet.locatecontrol/dist/L.Control.Locate.min.css",
+              "external_modules/syntests/node_modules/@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css"
             ],
             "scripts": [
               "node_modules/leaflet/dist/leaflet.js",

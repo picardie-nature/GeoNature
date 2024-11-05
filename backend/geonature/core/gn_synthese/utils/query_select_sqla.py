@@ -13,7 +13,7 @@ import uuid
 from flask import current_app
 
 import sqlalchemy as sa
-from sqlalchemy import func, or_, and_, select, distinct
+from sqlalchemy import func, or_, and_, select, distinct, any_
 from sqlalchemy.sql import text
 from sqlalchemy.orm import aliased
 from werkzeug.exceptions import BadRequest
@@ -471,7 +471,13 @@ class SyntheseQuery:
         # generic filters
         for colname, value in self.filters.items():
             if colname.startswith("area"):
-                if self.geom_column.class_ != self.model:
+                if colname == "area_DEP":
+                    col = getattr(self.model.__table__.columns, "departements")
+                    self.query = self.query.where(col.op("&&")(value))
+                elif colname == "area_COM":
+                    col = getattr(self.model.__table__.columns, "municipalities")
+                    self.query = self.query.where(col.op("&&")(value))
+                elif self.geom_column.class_ != self.model:
                     l_areas_cte = LAreas.query.filter(LAreas.id_area.in_(value)).cte("area_filter")
                     self.query = self.query.where(
                         func.ST_Intersects(self.geom_column, l_areas_cte.c.geom)

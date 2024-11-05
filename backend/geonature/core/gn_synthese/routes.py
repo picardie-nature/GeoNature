@@ -192,7 +192,7 @@ def get_observations_for_web(permissions):
         # No need to apply blurring => same path as before blurring feature
         obs_query = (
             select(observations)
-            .where(VSyntheseForWebApp.the_geom_4326.isnot(None))
+            #.where(VSyntheseForWebApp.the_geom_4326.isnot(None))
             .order_by(VSyntheseForWebApp.date_min.desc())
             .limit(result_limit)
         )
@@ -275,6 +275,10 @@ def get_observations_for_web(permissions):
         )
         query = select(obs_query.c.geojson, grouped_properties).group_by(obs_query.c.geojson)
 
+    from sqlalchemy.dialects import postgresql;
+    #print(query.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
+    print(query.compile(dialect=postgresql.dialect()))
+    # print(query)
     results = DB.session.execute(query)
 
     # Build final GeoJson
