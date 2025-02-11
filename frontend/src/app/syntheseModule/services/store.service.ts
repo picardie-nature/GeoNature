@@ -5,7 +5,8 @@ import { Injectable } from '@angular/core';
 })
 export class SyntheseStoreService {
   public idSyntheseList: Array<number>;
-  public gridData: Array<any>;
-  public pointData: Array<any>;
+  public data: {
+    [key: string]: Array<any>
+  } = {};
   constructor() {}
 }
