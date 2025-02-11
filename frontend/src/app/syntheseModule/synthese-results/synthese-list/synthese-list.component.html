@@ -34,22 +34,56 @@
         (click)="openModalCol($event, modalCol)"
       ></i>
     </ng-template>
+
     <ng-template
       let-row="row"
       ngx-datatable-cell-template
     >
-      <button
-        class="btn btn-outline-shadow btn-no-padding btn-ghost"
-        [routerLink]="['occurrence', row['id_synthese'], 'details']"
-      >
-        <i
-          #iElement
-          matTooltip="{{ row[mapListService.idName] }}"
-          class="fa fa-info-circle"
-          aria-hidden="true "
-          data-qa="synthese-info-btn"
-        ></i>
-      </button>
+      <ng-container *ngIf="criteriaService.isCriteriaDisplay(); else defaultInfoBtn">
+        <ng-template
+          #infoBtnWithCriteria
+          [ngTemplateOutlet]="infoBtnWithCriteria"
+          let-criteria
+          [ngTemplateOutletContext]="{ $implicit: criteriaService.getCriteriaStyle(row) }"
+        >
+          <button
+            (click)="openInfoModal(row)"
+            [matTooltip]="
+              criteriaService.buildCriteriaTxt(criteria) +
+              '\n' +
+              'Id : ' +
+              row[mapListService.idName]
+            "
+            class="btn btn-outline-shadow btn-no-padding btn-map-criteria"
+            style="
+              background-color: {{ criteria.color }};
+              color: {{ criteria.icon?.color }} !important;
+            "
+            aria-hidden="false"
+            [aria-label]="criteria.label"
+          >
+            <i
+              class="fa fa-info"
+              aria-hidden="true"
+              data-qa="synthese-info-btn"
+            ></i>
+          </button>
+        </ng-template>
+      </ng-container>
+
+      <ng-template #defaultInfoBtn>
+        <button
+          class="btn btn-outline-shadow btn-no-padding btn-ghost"
+          (click)="openInfoModal(row)"
+        >
+          <i
+            matTooltip="{{ row[mapListService.idName] }}"
+            class="fa fa-info-circle"
+            aria-hidden="true"
+            data-qa="synthese-info-btn"
+          ></i>
+        </button>
+      </ng-template>
     </ng-template>
   </ngx-datatable-column>
 
