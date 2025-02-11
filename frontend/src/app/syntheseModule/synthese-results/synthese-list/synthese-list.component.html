@@ -47,17 +47,17 @@
           [ngTemplateOutletContext]="{ $implicit: criteriaService.getCriteriaStyle(row) }"
         >
           <button
-            (click)="openInfoModal(row)"
+            [routerLink]="['occurrence', row['id_synthese'], 'details']"
+            class="btn btn-outline-shadow btn-no-padding btn-map-criteria"
+            style="
+              background-color: {{ criteria.color }};
+              color: {{ criteria.icon?.color }} !important;
+            "
             [matTooltip]="
               criteriaService.buildCriteriaTxt(criteria) +
               '\n' +
               'Id : ' +
               row[mapListService.idName]
-            "
-            class="btn btn-outline-shadow btn-no-padding btn-map-criteria"
-            style="
-              background-color: {{ criteria.color }};
-              color: {{ criteria.icon?.color }} !important;
             "
             aria-hidden="false"
             [aria-label]="criteria.label"
@@ -74,7 +74,7 @@
       <ng-template #defaultInfoBtn>
         <button
           class="btn btn-outline-shadow btn-no-padding btn-ghost"
-          (click)="openInfoModal(row)"
+          [routerLink]="['occurrence', row['id_synthese'], 'details']"
         >
           <i
             matTooltip="{{ row[mapListService.idName] }}"
