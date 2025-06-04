@@ -7,7 +7,7 @@ from geonature.core.gn_permissions.decorators import (
     permissions_required,
 )
 from geonature.core.gn_permissions.tools import get_permissions
-from geonature.core.gn_synthese.models import BibReportsTypes, Synthese, TReport
+from geonature.core.gn_synthese.models import BibReportsTypes, Synthese, SyntheseExtended, TReport
 from geonature.core.gn_synthese.schemas import ReportSchema
 from geonature.core.gn_synthese.utils.query_select_sqla import SyntheseQuery
 from geonature.core.notifications.utils import dispatch_notifications
@@ -218,7 +218,7 @@ def list_all_reports(permissions):
 
     # On vérifie les permissions en lecture sur la synthese
     synthese_query = select(Synthese.id_synthese).select_from(Synthese)
-    synthese_query_obj = SyntheseQuery(Synthese, synthese_query, {})
+    synthese_query_obj = SyntheseQuery(SyntheseExtended, synthese_query, {})
     synthese_query_obj.filter_query_with_permissions(g.current_user, permissions)
     cte_synthese = synthese_query_obj.query.cte("cte_synthese")
     query = query.where(TReport.id_synthese == cte_synthese.c.id_synthese)

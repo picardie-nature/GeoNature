@@ -17,7 +17,7 @@ from geonature.core.gn_permissions.decorators import permissions_required
 from geonature.core.gn_synthese.models import (
     CorAreaSynthese,
     Synthese,
-    VSyntheseForWebApp,
+    SyntheseExtended,
 )
 from geonature.core.gn_synthese.synthese_config import MANDATORY_COLUMNS
 from geonature.core.gn_synthese.utils.blurring import (
@@ -94,17 +94,17 @@ def export_taxon_web(permissions):
 
     sub_query = (
         select(
-            VSyntheseForWebApp.cd_ref,
-            func.count(distinct(VSyntheseForWebApp.id_synthese)).label("nb_obs"),
-            func.min(VSyntheseForWebApp.date_min).label("date_min"),
-            func.max(VSyntheseForWebApp.date_max).label("date_max"),
+            SyntheseExtended.cd_ref,
+            func.count(distinct(SyntheseExtended.id_synthese)).label("nb_obs"),
+            func.min(SyntheseExtended.date_min).label("date_min"),
+            func.max(SyntheseExtended.date_max).label("date_max"),
         )
-        .where(VSyntheseForWebApp.id_synthese.in_(id_list))
-        .group_by(VSyntheseForWebApp.cd_ref)
+        .where(SyntheseExtended.id_synthese.in_(id_list))
+        .group_by(SyntheseExtended.cd_ref)
     )
 
     synthese_query_class = SyntheseQuery(
-        VSyntheseForWebApp,
+        SyntheseExtended,
         sub_query,
         {},
     )
@@ -202,7 +202,7 @@ def export_observations_web(permissions):
     if not blurring_permissions:
         # Get the CTE for synthese filtered by user permissions
         synthese_query_class = SyntheseQuery(
-            Synthese,
+            SyntheseExtended,
             select(Synthese.id_synthese),
             {},
         )
@@ -363,10 +363,10 @@ def export_metadata(permissions):
             500,
         )
 
-    q = select(distinct(VSyntheseForWebApp.id_dataset), metadata_view.tableDef)
+    q = select(distinct(SyntheseExtended.id_dataset), metadata_view.tableDef)
 
     synthese_query_class = SyntheseQuery(
-        VSyntheseForWebApp,
+        SyntheseExtended,
         q,
         filters,
     )
@@ -376,7 +376,7 @@ def export_metadata(permissions):
             metadata_view.tableDef.columns,
             current_app.config["SYNTHESE"]["EXPORT_METADATA_ID_DATASET_COL"],
         ),
-        VSyntheseForWebApp.id_dataset,
+        SyntheseExtended.id_dataset,
     )
 
     # Filter query with permissions (scope, sensitivity, ...)
@@ -418,7 +418,7 @@ def export_status(permissions):
 
     # Initalize the select object
     query = select(
-        distinct(VSyntheseForWebApp.cd_nom).label("cd_nom"),
+        distinct(SyntheseExtended.cd_nom).label("cd_nom"),
         Taxref.cd_ref,
         Taxref.nom_complet,
         Taxref.nom_vern,
@@ -432,17 +432,17 @@ def export_status(permissions):
         TaxrefBdcStatutValues.label_statut,
     )
     # Initialize SyntheseQuery class
-    synthese_query = SyntheseQuery(VSyntheseForWebApp, query, filters)
+    synthese_query = SyntheseQuery(SyntheseExtended, query, filters)
 
     # Filter query with permissions
     synthese_query.filter_query_all_filters(g.current_user, permissions)
 
     # Add join
-    synthese_query.add_join(Taxref, Taxref.cd_nom, VSyntheseForWebApp.cd_nom)
+    synthese_query.add_join(Taxref, Taxref.cd_nom, SyntheseExtended.cd_nom)
     synthese_query.add_join(
         CorAreaSynthese,
         CorAreaSynthese.id_synthese,
-        VSyntheseForWebApp.id_synthese,
+        SyntheseExtended.id_synthese,
     )
     synthese_query.add_join(
         bdc_statut_cor_text_area, bdc_statut_cor_text_area.c.id_area, CorAreaSynthese.id_area
