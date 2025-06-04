@@ -149,9 +149,9 @@ def general_stats(permissions):
     results = {"nb_allowed_datasets": nb_allowed_datasets}
 
     queries = {
-        "nb_obs": select(Synthese.id_synthese),
+        "nb_obs": select(SyntheseExtended.id_synthese),
         "nb_distinct_species": select(
-            func.distinct(Synthese.cd_nom),
+            func.distinct(SyntheseExtended.cd_nom),
         ),
         "nb_distinct_observer": select(func.distinct(Synthese.observers)),
     }

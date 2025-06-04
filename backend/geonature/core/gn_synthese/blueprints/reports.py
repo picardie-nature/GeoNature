@@ -217,7 +217,7 @@ def list_all_reports(permissions):
         )
 
     # On vérifie les permissions en lecture sur la synthese
-    synthese_query = select(Synthese.id_synthese).select_from(Synthese)
+    synthese_query = select(SyntheseExtended.id_synthese).select_from(SyntheseExtended)
     synthese_query_obj = SyntheseQuery(SyntheseExtended, synthese_query, {})
     synthese_query_obj.filter_query_with_permissions(g.current_user, permissions)
     cte_synthese = synthese_query_obj.query.cte("cte_synthese")

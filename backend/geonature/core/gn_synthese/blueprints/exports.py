@@ -16,7 +16,6 @@ from geojson import Feature, FeatureCollection
 from geonature.core.gn_permissions.decorators import permissions_required
 from geonature.core.gn_synthese.models import (
     CorAreaSynthese,
-    Synthese,
     SyntheseExtended,
 )
 from geonature.core.gn_synthese.synthese_config import MANDATORY_COLUMNS
@@ -203,7 +202,7 @@ def export_observations_web(permissions):
         # Get the CTE for synthese filtered by user permissions
         synthese_query_class = SyntheseQuery(
             SyntheseExtended,
-            select(Synthese.id_synthese),
+            select(SyntheseExtended.id_synthese),
             {},
         )
         synthese_query_class.filter_query_all_filters(g.current_user, permissions)
@@ -213,7 +212,7 @@ def export_observations_web(permissions):
         # Use slightly the same process as for get_observations_for_web()
         # Add a where_clause to filter the id_synthese provided to reduce the
         # UNION queries
-        where_clauses = [Synthese.id_synthese.in_(id_list)]
+        where_clauses = [SyntheseExtended.id_synthese.in_(id_list)]
         blurred_geom_query, precise_geom_query = build_blurred_precise_geom_queries(
             filters={}, where_clauses=where_clauses
         )

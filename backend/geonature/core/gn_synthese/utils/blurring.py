@@ -6,7 +6,7 @@ from sqlalchemy.orm import aliased
 from pypnnomenclature.models import BibNomenclaturesTypes, TNomenclatures
 from ref_geo.models import BibAreasTypes, LAreas
 
-from geonature.core.gn_synthese.models import CorAreaSynthese, Synthese, SyntheseExtended
+from geonature.core.gn_synthese.models import CorAreaSynthese, SyntheseExtended
 from geonature.core.sensitivity.models import cor_sensitivity_area_type
 from geonature.core.gn_synthese.utils.query_select_sqla import SyntheseQuery
 
@@ -35,8 +35,8 @@ def build_sensitive_unsensitive_filters():
     )
 
     return (
-        Synthese.id_nomenclature_sensitivity != non_sensitive_nomenc,
-        Synthese.id_nomenclature_sensitivity == non_sensitive_nomenc,
+        SyntheseExtended.id_nomenclature_sensitivity != non_sensitive_nomenc,
+        SyntheseExtended.id_nomenclature_sensitivity == non_sensitive_nomenc,
     )
 
 
@@ -46,14 +46,14 @@ def build_blurred_precise_geom_queries(
     # Build 2 queries that will be UNIONed
     # The where_clauses list enables to add more conditions to the base query
     # Used in export query
-    where_clauses.append(Synthese.the_geom_4326.isnot(None))
+    where_clauses.append(SyntheseExtended.the_geom_4326.isnot(None))
 
     # Query precise geom, for use with unsensitive observations
     # and sensitive observations with precise permission
     columns = [
         sa.literal(1).label("priority"),
-        Synthese.id_synthese.label("id_synthese"),
-        Synthese.the_geom_4326.label("geom"),
+        SyntheseExtended.id_synthese.label("id_synthese"),
+        SyntheseExtended.the_geom_4326.label("geom"),
     ]
     # Size hierarchy can be used here to filter on it in
     # a mesh mode scenario.
@@ -61,8 +61,8 @@ def build_blurred_precise_geom_queries(
         # 0 since no blurring geometry is associated here and a point have a 0 size
         columns.append(sa.literal(0).label("size_hierarchy"))
     precise_geom_query = SyntheseQuery(
-        Synthese,
-        sa.select(*columns).where(sa.and_(*where_clauses)).order_by(Synthese.date_min.desc()),
+        SyntheseExtended,
+        sa.select(*columns).where(sa.and_(*where_clauses)).order_by(SyntheseExtended.date_min.desc()),
         filters=dict(filters),  # not to edit the actual filter object
     )
 
@@ -86,7 +86,7 @@ def build_blurred_precise_geom_queries(
     # - orderby needed to match the non blurred and the blurred observations
     columns = [
         sa.literal(2).label("priority"),
-        Synthese.id_synthese.label("id_synthese"),
+        SyntheseExtended.id_synthese.label("id_synthese"),
         geom,
     ]
     # size hierarchy is the size of the joined blurring area
@@ -97,15 +97,15 @@ def build_blurred_precise_geom_queries(
         sa.select(*columns)
         .where(
             cor_sensitivity_area_type.c.id_nomenclature_sensitivity
-            == Synthese.id_nomenclature_sensitivity
+            == SyntheseExtended.id_nomenclature_sensitivity
         )
         .where(sa.and_(*where_clauses))
-        .order_by(Synthese.date_min.desc()),
+        .order_by(SyntheseExtended.date_min.desc()),
         filters=dict(filters),
         query_joins=sa.join(
-            Synthese,
+            SyntheseExtended,
             CorAreaSyntheseAlias,
-            CorAreaSyntheseAlias.id_synthese == Synthese.id_synthese,
+            CorAreaSyntheseAlias.id_synthese == SyntheseExtended.id_synthese,
         ),
         geom_column=LAreas.geom_4326,
     )
