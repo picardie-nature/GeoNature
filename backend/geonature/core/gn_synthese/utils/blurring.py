@@ -61,7 +61,7 @@ def build_blurred_precise_geom_queries(
         # 0 since no blurring geometry is associated here and a point have a 0 size
         columns.append(sa.literal(0).label("size_hierarchy"))
     precise_geom_query = SyntheseQuery(
-        SyntheseExtended,
+        Synthese,
         sa.select(*columns).where(sa.and_(*where_clauses)).order_by(Synthese.date_min.desc()),
         filters=dict(filters),  # not to edit the actual filter object
     )
@@ -93,7 +93,7 @@ def build_blurred_precise_geom_queries(
     if select_size_hierarchy:
         columns.append(BibAreasTypesAlias.size_hierarchy.label("size_hierarchy"))
     blurred_geom_query = SyntheseQuery(
-        SyntheseExtended,
+        Synthese,
         sa.select(*columns)
         .where(
             cor_sensitivity_area_type.c.id_nomenclature_sensitivity
