@@ -311,8 +311,7 @@ class SyntheseQuery:
                     aliased_cor_taxon_attr[taxhub_id_attr],
                     [
                         aliased_cor_taxon_attr[taxhub_id_attr].id_attribut == taxhub_id_attr,
-                        aliased_cor_taxon_attr[taxhub_id_attr].cd_ref
-                        == self.model.cd_ref,
+                        aliased_cor_taxon_attr[taxhub_id_attr].cd_ref == self.model.cd_ref,
                     ],
                 )
                 self.query = self.query.where(
@@ -340,7 +339,7 @@ class SyntheseQuery:
                 ):
                     value = status_cfg["status_types"]
 
-                protection_status_value += value
+                protection_status_value.append(value)
 
         if protection_status_value or red_list_filters:
             self.build_bdc_status_filters(protection_status_value, red_list_filters)
@@ -601,12 +600,14 @@ class SyntheseQuery:
             la liste des status selectionnés par l'utilisateur s'appliquant à l'observation est
             aggrégée de façon à tester le nombre puis jointer sur le département de la donnée
         """
+
+        # Préparation des filtres de statuts à ajouter dans le where du CTE
         # Ajout jointure permettant d'avoir le département pour chaque donnée
         cas_dep = aliased(CorAreaSynthese)
         self.add_join(cas_dep, cas_dep.id_synthese, self.model.id_synthese)
 
         # Creation requête CTE : taxon, zone d'application départementale des textes
-        #   pour les taxons répondant aux critères de selection
+        # pour les taxons répondant aux critères de selection
         bdc_status_by_type_cte = (
             select(
                 TaxrefBdcStatutTaxon.cd_ref,
@@ -639,17 +640,41 @@ class SyntheseQuery:
         # ajout des filtres de selection des textes
         bdc_status_filters = []
         if red_list_filters:
-            bdc_status_filters = [
-                and_(
-                    TaxrefBdcStatutValues.code_statut.in_(v),
-                    TaxrefBdcStatutText.cd_type_statut == k,
-                )
-                for k, v in red_list_filters.items()
+            bdc_status_filters += [
+                TaxonAreaStatus.status[k].has_any(array(v)) for k, v in red_list_filters.items()
             ]
         if protection_status_value:
-            bdc_status_filters.append(
-                TaxrefBdcStatutText.cd_type_statut.in_(protection_status_value)
+            bdc_status_filters += [
+                TaxonAreaStatus.status.has_any(array(status_value))
+                for status_value in protection_status_value
+            ]
+
+        # Creation requête CTE : taxon, zone d'application départementale des textes
+        #   pour les taxons répondant aux critères de selection
+        subquery = (
+            select(CorAreaSynthese.id_synthese, TaxonAreaStatus.status)
+            .join(TaxonAreaStatus, CorAreaSynthese.id_area == TaxonAreaStatus.id_area)
+            .where(
+                TaxonAreaStatus.cd_ref == SyntheseExtended.cd_ref,
+                CorAreaSynthese.id_synthese == SyntheseExtended.id_synthese,
+                sa.and_(*bdc_status_filters),
             )
+            .lateral()
+        )
+
+        # Requête principale
+        status_cte = select(SyntheseExtended.id_synthese, subquery.c.status).join(
+            subquery, literal_column("true")
+        )
+
+        status_cte = status_cte.cte(name="status" + str(uuid.uuid4())[:4])
+
+        exists_subq = (
+            select(literal_column("1"))
+            .select_from(status_cte)
+            .where(and_(status_cte.c.id_synthese == SyntheseExtended.id_synthese))
+            .exists()
+        )
 
         bdc_status_by_type_cte = bdc_status_by_type_cte.where(or_(*bdc_status_filters))
         bdc_status_by_type_cte = bdc_status_by_type_cte.cte(
@@ -668,9 +693,7 @@ class SyntheseQuery:
             == (len(protection_status_value) + len(red_list_filters))
         )
 
-        bdc_status_cte = bdc_status_cte.cte(
-            name="bdc_status_cte_" + str(uuid.uuid4())[:4]
-        )
+        bdc_status_cte = bdc_status_cte.cte(name="bdc_status_cte_" + str(uuid.uuid4())[:4])
 
         # Jointure sur le taxon
         # et vérification que l'ensemble des textes
