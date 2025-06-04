@@ -93,7 +93,7 @@ def build_blurred_precise_geom_queries(
     if select_size_hierarchy:
         columns.append(BibAreasTypesAlias.size_hierarchy.label("size_hierarchy"))
     blurred_geom_query = SyntheseQuery(
-        Synthese,
+        SyntheseExtended,
         sa.select(*columns)
         .where(
             cor_sensitivity_area_type.c.id_nomenclature_sensitivity

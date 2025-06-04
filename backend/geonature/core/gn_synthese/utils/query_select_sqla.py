@@ -13,9 +13,10 @@ import uuid
 from flask import current_app
 
 import sqlalchemy as sa
-from sqlalchemy import func, or_, and_, select, distinct
+from sqlalchemy import func, or_, and_, select, distinct, literal_column
 from sqlalchemy.sql import text
 from sqlalchemy.orm import aliased
+from sqlalchemy.dialects.postgresql import array, ARRAY
 from werkzeug.exceptions import BadRequest
 from shapely.geometry import shape
 from geoalchemy2.shape import from_shape
@@ -30,6 +31,7 @@ from geonature.core.gn_synthese.models import (
     BibReportsTypes,
     TReport,
     TSources,
+    SyntheseExtended,
 )
 from geonature.core.gn_meta.models import (
     CorDatasetActor,
@@ -41,6 +43,7 @@ from apptax.taxonomie.models import (
     TaxrefTree,
     CorTaxonAttribut,
     TaxrefBdcStatutTaxon,
+    TaxonAreaStatus,
     bdc_statut_cor_text_area,
     TaxrefBdcStatutCorTextValues,
     TaxrefBdcStatutText,
@@ -602,46 +605,11 @@ class SyntheseQuery:
         """
 
         # Préparation des filtres de statuts à ajouter dans le where du CTE
-        # Ajout jointure permettant d'avoir le département pour chaque donnée
-        cas_dep = aliased(CorAreaSynthese)
-        self.add_join(cas_dep, cas_dep.id_synthese, self.model.id_synthese)
-
-        # Creation requête CTE : taxon, zone d'application départementale des textes
-        # pour les taxons répondant aux critères de selection
-        bdc_status_by_type_cte = (
-            select(
-                TaxrefBdcStatutTaxon.cd_ref,
-                bdc_statut_cor_text_area.c.id_area,
-                TaxrefBdcStatutText.cd_type_statut,
-            )
-            .distinct()
-            .select_from(
-                TaxrefBdcStatutTaxon.__table__.join(
-                    TaxrefBdcStatutCorTextValues,
-                    TaxrefBdcStatutCorTextValues.id_value_text
-                    == TaxrefBdcStatutTaxon.id_value_text,
-                )
-                .join(
-                    TaxrefBdcStatutText,
-                    TaxrefBdcStatutText.id_text == TaxrefBdcStatutCorTextValues.id_text,
-                )
-                .join(
-                    TaxrefBdcStatutValues,
-                    TaxrefBdcStatutValues.id_value == TaxrefBdcStatutCorTextValues.id_value,
-                )
-                .join(
-                    bdc_statut_cor_text_area,
-                    bdc_statut_cor_text_area.c.id_text == TaxrefBdcStatutText.id_text,
-                )
-            )
-            .where(TaxrefBdcStatutText.enable == True)
-        )
-
-        # ajout des filtres de selection des textes
         bdc_status_filters = []
         if red_list_filters:
             bdc_status_filters += [
-                TaxonAreaStatus.status[k].has_any(array(v)) for k, v in red_list_filters.items()
+                TaxonAreaStatus.status[k].has_any(array(v))
+                for k, v in red_list_filters.items()
             ]
         if protection_status_value:
             bdc_status_filters += [
@@ -651,64 +619,34 @@ class SyntheseQuery:
 
         # Creation requête CTE : taxon, zone d'application départementale des textes
         #   pour les taxons répondant aux critères de selection
-        subquery = (
-            select(CorAreaSynthese.id_synthese, TaxonAreaStatus.status)
-            .join(TaxonAreaStatus, CorAreaSynthese.id_area == TaxonAreaStatus.id_area)
-            .where(
-                TaxonAreaStatus.cd_ref == SyntheseExtended.cd_ref,
-                CorAreaSynthese.id_synthese == SyntheseExtended.id_synthese,
-                sa.and_(*bdc_status_filters),
-            )
-            .lateral()
-        )
+        subquery = select(
+            CorAreaSynthese.id_synthese,
+            TaxonAreaStatus.status
+        ).join(
+            TaxonAreaStatus, CorAreaSynthese.id_area == TaxonAreaStatus.id_area
+        ).where(
+            TaxonAreaStatus.cd_ref == SyntheseExtended.cd_ref,
+            CorAreaSynthese.id_synthese == SyntheseExtended.id_synthese,
+            sa.and_(*bdc_status_filters)
+        ).lateral()
 
         # Requête principale
-        status_cte = select(SyntheseExtended.id_synthese, subquery.c.status).join(
+        status_cte = select(
+            SyntheseExtended.id_synthese,
+            subquery.c.status
+        ).join(
             subquery, literal_column("true")
         )
 
         status_cte = status_cte.cte(name="status" + str(uuid.uuid4())[:4])
 
-        exists_subq = (
-            select(literal_column("1"))
-            .select_from(status_cte)
-            .where(and_(status_cte.c.id_synthese == SyntheseExtended.id_synthese))
-            .exists()
-        )
+        exists_subq = select(literal_column("1")).select_from(status_cte).where(
+            and_(
+                status_cte.c.id_synthese == SyntheseExtended.id_synthese
+            )
+        ).exists()
 
-        bdc_status_by_type_cte = bdc_status_by_type_cte.where(or_(*bdc_status_filters))
-        bdc_status_by_type_cte = bdc_status_by_type_cte.cte(
-            name="bdc_status_by_type_" + str(uuid.uuid4())[:4]
-        )
-
-        # group by de façon à ne selectionner que les taxons
-        #   qui ont l'ensemble des textes selectionnés par l'utilisateur
-        #   c-a-d dont le nombre de cd_type_statut correspond au nombre demandé
-        bdc_status_cte = select(
-            bdc_status_by_type_cte.c.cd_ref,
-            func.array_agg(bdc_status_by_type_cte.c.id_area).label("ids_area"),
-        )
-        bdc_status_cte = bdc_status_cte.group_by(bdc_status_by_type_cte.c.cd_ref).having(
-            func.count(distinct(bdc_status_by_type_cte.c.cd_type_statut))
-            == (len(protection_status_value) + len(red_list_filters))
-        )
-
-        bdc_status_cte = bdc_status_cte.cte(name="bdc_status_cte_" + str(uuid.uuid4())[:4])
-
-        # Jointure sur le taxon
-        # et vérification que l'ensemble des textes
-        # soit sur bien sur le département de l'observation
-        self.add_join_multiple_cond(
-            bdc_status_cte,
-            [
-                bdc_status_cte.c.cd_ref == self.model.cd_ref,
-                func.array_length(
-                    func.array_positions(bdc_status_cte.c.ids_area, cas_dep.id_area), 1
-                )
-                == (len(protection_status_value) + len(red_list_filters)),
-            ],
-        )
-
+        self.query = self.query.where(exists_subq)
 
 def remove_accents(input_str):
     nfkd_form = unicodedata.normalize("NFKD", input_str)
