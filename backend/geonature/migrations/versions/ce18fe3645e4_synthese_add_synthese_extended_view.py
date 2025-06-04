@@ -103,7 +103,8 @@ def upgrade():
                 t.classe,
                 t.ordre,
                 t.famille,
-                t.sous_famille
+                t.sous_famille,
+                t.id_habitat
             FROM gn_synthese.synthese AS s
                 LEFT JOIN taxonomie.taxref AS t
                     ON t.cd_nom = s.cd_nom
