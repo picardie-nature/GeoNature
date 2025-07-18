@@ -867,6 +867,14 @@ Voici quelques conseils sur l’envoi de réponse dans vos routes.
 
 - Renvoyer une liste et sa longueur dans une structure de données non conventionnelle est strictement inutile, il est très simple d’accéder à la longueur de la liste en javascript via l’attribut ``length``.
 
+- Pagination : Flask-SQLAlchemy fournit l’utilitaire `db.paginate <https://flask-sqlalchemy.readthedocs.io/en/stable/api/#flask_sqlalchemy.SQLAlchemy.paginate>`_. Notons qu’il n’est pas nécessaire de récupérer les paramètres ``page`` et ``per_page`` de la requête puisque cela est fait automatiquement par ``db.paginate``. Par ailleurs, l’objet `Pagination <https://flask-sqlalchemy.readthedocs.io/en/stable/api/#flask_sqlalchemy.pagination.Pagination>`_ créé par ``db.paginate`` peut directement être renvoyé passé à ``jsonify`` par votre route ; il sera sérialisé dans `une structure commune à l’ensemble de l’application <https://github.com/PnX-SI/GeoNature/blob/master/backend/geonature/utils/json.py>`_. Ce mécanisme nécessite que le schéma Marshmallow nécessaire à la sérialisation des objets paginés soit indiqué dans la variable ``g.pagination_schema``. À défaut, GeoNature essayera d’appeler la méthode ``as_dict()`` sur vos objets.
+    .. code-block:: python
+
+        def my_route():
+            query = sa.select(Item).where(Item.a.like("%foo%"))
+            g.pagination_schema = ItemSchema(only=["a", "b"])
+            return jsonify(db.paginate(query))
+
 - Traitement des erreurs : utiliser `les exceptions prévues à cet effet <https://werkzeug.palletsprojects.com/en/2.0.x/exceptions/>`_ :
     .. code-block:: python
 
@@ -924,7 +932,7 @@ Le décorateur ``@json_resp``
 
 Historiquement, beaucoup de vues sont décorées avec le décorateur ``@json_resp``.
 
-Celui-ci apparait aujourd’hui superflu par rapport à l’usage directement de la fonction ``jsonify`` fournie par Flask.
+Celui-ci apparait aujourd’hui superflu en raison de la jsonification automatique par Flask des listes et des dictionnaires. Pour les autres structures de données, Flask fournit l’utilitaire ``jsonify()``.
 
 - ``utils_flask_sqla_geo.serializers.json_resp``
 
@@ -1680,3 +1688,4 @@ Pour sortir une nouvelle version de GeoNature :
 - Faites la release (https://github.com/PnX-SI/GeoNature/releases) en la taguant ``X.Y.Z`` (sans ``v`` devant) et en copiant le contenu du Changelog
 - Dans la branche ``develop``, modifiez le fichier ``VERSION`` en ``X.Y.Z.dev0`` et pareil dans le fichier ``docs/CHANGELOG.md``
 - Faites la release de `GeoNature-Docker-services <https://github.com/PnX-SI/GeoNature-Docker-services>`_ avec la nouvelle version de GeoNature, et éventuellement des modules (Voir un `exemple <https://github.com/PnX-SI/GeoNature-Docker-services/pull/19/files>`_)
+- Faites la release sur `GeoNature_db <https://github.com/PnX-SI/geonature_db>`_ avec la nouvelle version de GeoNature et des modules externes
