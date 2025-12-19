@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Recherche" href="search.html" /><link rel="next" title="Développement" href="development.html" /><link rel="prev" title="Manuel utilisateur" href="user-manual.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>Manuel administrateur - Documentation GeoNature 2.16.0</title>
+        <title>Manuel administrateur - Documentation GeoNature 2.16.4</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Documentation GeoNature 2.16.0</div></a>
+      <a href="index.html"><div class="brand">Documentation GeoNature 2.16.4</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -194,7 +194,7 @@
     <img class="sidebar-logo" src="_static/LogoGeonature.jpg" alt="Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Documentation GeoNature 2.16.0</span>
+  <span class="sidebar-brand-text">Documentation GeoNature 2.16.4</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Recherche" name="q" aria-label="Recherche">
@@ -1790,6 +1790,8 @@ fichiers par *.asc :</p>
 <h2>Authentification<a class="headerlink" href="#authentification" title="Lien vers cette rubrique">¶</a></h2>
 <section id="demande-de-creation-de-compte">
 <h3>Demande de création de compte<a class="headerlink" href="#demande-de-creation-de-compte" title="Lien vers cette rubrique">¶</a></h3>
+<div class="admonition-version-de-geonature-2-16-4 admonition">
+<p class="admonition-title">Version de GeoNature &lt; 2.16.4</p>
 <p>Depuis la version 2.1.0, UsersHub propose une API de création de compte utilisateur. Une interface a été ajoutée à GeoNature pour permettre aux futurs utilisateurs de faire des demandes de création de compte depuis la page d’authentification de GeoNature. Ce mode est activable/désactivable depuis la configuration globale de GeoNature.</p>
 <p>Pour des raisons de sécurité, l’API de création de compte est réservée aux utilisateurs « admin » grâce à un token secret. GeoNature a donc besoin de se connecter en tant qu’administrateur à UsersHub pour éxecuter les requêtes d’administration de compte.
 Renseigner les paramètres suivants dans le fichier de configuration (<code class="docutils literal notranslate"><span class="pre">geonature_config.toml</span></code>). L’utilisateur doit avoir des droits 6 dans UsersHub</p>
@@ -1797,10 +1799,11 @@ Renseigner les paramètres suivants dans le fichier de configuration (<code clas
 <span class="w">    </span><span class="n">URL_USERSHUB</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;http://mon_adresse_usershub.fr&#39;</span><span class="w"> </span><span class="c1"># sans slash final</span>
 <span class="w">    </span><span class="c1"># Administrateur de mon application</span>
 <span class="w">    </span><span class="n">ADMIN_APPLICATION_LOGIN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;login_admin_usershub&quot;</span>
-<span class="w">    </span><span class="n">ADMIN_APPLICATION_PASSWORD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;password_admin_usershub</span>
+<span class="w">    </span><span class="n">ADMIN_APPLICATION_PASSWORD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;password_admin_usershub&quot;</span>
 </pre></div>
 </div>
-<p>Les fonctionnalités de création de compte nécessitent l’envoi d’emails pour vérifier l’identité des demandeurs de compte. Il est donc nécessaire d’avoir un serveur SMTP capable d’envoyer des emails. Renseigner la rubrique <code class="docutils literal notranslate"><span class="pre">MAIL_CONFIG</span></code> de la configuration. La description détaillées des paramètres de configuration d’envoie des emails est disponible dans <a class="reference external" href="https://flask-mail.readthedocs.io/en/latest/#configuring-flask-mail">la documentation de Flask-Mail</a>. Exemple :</p>
+</div>
+<p>Tout d’abord, les fonctionnalités de création de compte nécessitent l’envoi d’emails pour vérifier l’identité des demandeurs de compte. Il est donc nécessaire d’avoir un serveur SMTP capable d’envoyer des emails. Renseigner la rubrique <code class="docutils literal notranslate"><span class="pre">MAIL_CONFIG</span></code> de la configuration. La description détaillées des paramètres de configuration d’envoie des emails est disponible dans <a class="reference external" href="https://flask-mail.readthedocs.io/en/latest/#configuring-flask-mail">la documentation de Flask-Mail</a>. Exemple :</p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[MAIL_CONFIG]</span>
 <span class="w">    </span><span class="n">MAIL_SERVER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;mail.espaces-naturels.fr&#39;</span>
 <span class="w">    </span><span class="n">MAIL_PORT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">465</span>
@@ -1812,32 +1815,31 @@ Renseigner les paramètres suivants dans le fichier de configuration (<code clas
 <span class="w">    </span><span class="n">MAIL_ASCII_ATTACHMENTS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
 </pre></div>
 </div>
-<p>Pour activer cette fonctionnalité (qui est par défaut désactivée), modifier le fichier de configuration de la manière suivante :</p>
-<p>NB : tous les paramètres décrits ci-dessous doivent être dans la rubrique <code class="docutils literal notranslate"><span class="pre">[ACCOUNT_MANAGEMENT]</span></code></p>
+<p>Pour activer la fonctionnalité de création de compte (qui est par défaut désactivée), modifier la section <code class="docutils literal notranslate"><span class="pre">[ACCOUNT_MANAGEMENT]</span></code> dans le fichier de configuration de la manière suivante :</p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[ACCOUNT_MANAGEMENT]</span>
 <span class="w">    </span><span class="n">ENABLE_SIGN_UP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 </pre></div>
 </div>
-<p>Deux modes sont alors disponibles. Soit l’utilisateur est automatiquement accepté et un compte lui est créé après une confirmation de son email, soit un mail est envoyé à un administrateur pour confirmer la demande. Le compte ne sera crée qu’après validation par l’administrateur. Le paramètre <code class="docutils literal notranslate"><span class="pre">AUTO_ACCOUNT_CREATION</span></code> contrôle ce comportement (par défaut le compte créé sans validation par un administrateur: true). Dans le mode « création de compte validé par administrateur », il est indispensable de renseigner un email où seront envoyés les emails de validation (paramètre <code class="docutils literal notranslate"><span class="pre">VALIDATOR_EMAIL</span></code>)</p>
-<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># automatique</span>
+<p>Deux modes sont alors disponibles. Soit l’utilisateur est automatiquement accepté et son compte est créé après une confirmation de son email, soit un mail est envoyé à un administrateur pour confirmer la demande. Le compte ne sera crée qu’après validation par l’administrateur. Le paramètre <code class="docutils literal notranslate"><span class="pre">AUTO_ACCOUNT_CREATION</span></code> contrôle ce comportement (par défaut le compte créé sans validation par un administrateur: true). Dans le mode « création de compte validé par administrateur », il est indispensable de renseigner un email où seront envoyés les emails de validation (paramètre <code class="docutils literal notranslate"><span class="pre">VALIDATOR_EMAIL</span></code>)</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Sans validation d&#39;un administrateur</span>
 <span class="k">[ACCOUNT_MANAGEMENT]</span>
 <span class="w">    </span><span class="n">ENABLE_SIGN_UP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 <span class="w">    </span><span class="n">AUTO_ACCOUNT_CREATION</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 
-<span class="c1"># validé par admin</span>
+<span class="c1"># Validation par administrateur</span>
 <span class="k">[ACCOUNT_MANAGEMENT]</span>
 <span class="w">    </span><span class="n">ENABLE_SIGN_UP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 <span class="w">    </span><span class="n">AUTO_ACCOUNT_CREATION</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
 <span class="w">    </span><span class="n">VALIDATOR_EMAIL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;email@validateur.io&#39;</span>
 </pre></div>
 </div>
-<p>L’utilisateur qui demande la création de compte est automatiquement mis dans un « groupe » UsersHub (par défaut, il s’agit du groupe « En poste »). Ce groupe est paramétrable depuis la table <code class="docutils literal notranslate"><span class="pre">utilisateurs.cor_role_app_profil</span></code>. (La ligne où <code class="docutils literal notranslate"><span class="pre">is_default_group_for_app</span> <span class="pre">=</span> <span class="pre">true</span></code> sera utilisée comme groupe par défaut pour GeoNature). Il n’est pas en paramètre de GeoNature pusqu’il serait falsifiable via l’API.</p>
+<p>L’utilisateur qui demande la création de compte est automatiquement mis dans un groupe (par défaut, il s’agit du groupe « En poste »). Ce groupe est paramétrable depuis la table <code class="docutils literal notranslate"><span class="pre">utilisateurs.cor_role_app_profil</span></code>. (La ligne où <code class="docutils literal notranslate"><span class="pre">is_default_group_for_app</span> <span class="pre">=</span> <span class="pre">true</span></code> sera utilisée comme groupe par défaut pour GeoNature). Il n’est pas en paramètre de GeoNature pusqu’il serait falsifiable via l’API.</p>
 <div class="admonition warning">
 <p class="admonition-title">Avertissement</p>
 <p>Si vous effectuez une migration depuis une version de GeoNature &lt; 2.2.0, aucun groupe par défaut n’est défini, vous devez définir à la main le groupe par défaut pour l’application GeoNature dans la table <code class="docutils literal notranslate"><span class="pre">utilisateurs.cor_role_app_profil</span></code>.</p>
 </div>
 <p>Dans le mode « création de compte validé par administrateur », lorsque l’inscription est validée par un administrateur, un email est envoyé à l’utilisateur pour lui indiquer la confirmation de son inscription.
-Il est possible de personnaliser le texte de la partie finale de cet email située juste avant la signature à l’aide du paramètre <code class="docutils literal notranslate"><span class="pre">ADDON_USER_EMAIL</span></code> (toujours à ajouter à la rubrique <code class="docutils literal notranslate"><span class="pre">[ACCOUNT_MANAGEMENT]</span></code>).
+Il est possible de personnaliser le texte de la partie finale de cet email située juste avant la signature à l’aide du paramètre <code class="docutils literal notranslate"><span class="pre">ADDON_USER_EMAIL</span></code>.
 Vous pouvez utiliser des balises HTML compatibles avec les emails pour ce texte.</p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[ACCOUNT_MANAGEMENT]</span>
 <span class="w">    </span><span class="n">ADDON_USER_EMAIL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&quot;&quot;&lt;p&gt;</span>
@@ -2146,6 +2148,15 @@ de sensibilité :</p>
 à GeoNature lors de son installation. Sinon, il peut être manuellement
 intégré ou mis à jour avec l’une ou l’autre des commandes suivantes (selon votre version de Taxref) :</p>
 <dl>
+<dt>Taxref v18 :</dt><dd><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>geonature<span class="w"> </span>sensitivity<span class="w"> </span>add-referential<span class="w"> </span><span class="se">\</span>
+<span class="w">         </span>--source-name<span class="w"> </span><span class="s2">&quot;Référentiel sensibilité TAXREF v18 20250904&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">         </span>--url<span class="w"> </span>https://geonature.fr/data/inpn/sensitivity/RefSensibiliteV18_20250904.zip<span class="w"> </span><span class="se">\</span>
+<span class="w">         </span>--zipfile<span class="w"> </span>RefSensibiliteV18_20250904.zip<span class="w"> </span><span class="se">\</span>
+<span class="w">         </span>--csvfile<span class="w"> </span>RefSensibilite_18.csv<span class="w">  </span><span class="se">\</span>
+<span class="w">         </span>--encoding<span class="o">=</span>utf-8
+</pre></div>
+</div>
+</dd>
 <dt>Taxref v17 :</dt><dd><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>geonature<span class="w"> </span>sensitivity<span class="w"> </span>add-referential<span class="w"> </span><span class="se">\</span>
 <span class="w">         </span>--source-name<span class="w"> </span><span class="s2">&quot;Référentiel sensibilité TAXREF v17 20240325&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">         </span>--url<span class="w"> </span>https://geonature.fr/data/inpn/sensitivity/RefSensibiliteV17_20240325.zip<span class="w"> </span><span class="se">\</span>
@@ -2185,6 +2196,8 @@ intégré ou mis à jour avec l’une ou l’autre des commandes suivantes (selo
 </dl>
 <p>Le jeu de règles est fourni pour chaque version précise de Taxref, certaines
 espèces sensibles pouvant voir leur <em>cd_nom</em> changer d’une version à l’autre.</p>
+<p>La commande de mise à jour ne supprime pas l’ancien référentiel.
+Pour le supprimer il faut utiliser la commande <code class="docutils literal notranslate"><span class="pre">geonature</span> <span class="pre">sensitivity</span> <span class="pre">remove-referential</span></code> en précisant la source.</p>
 <p>Si vous mettez à jour votre version du référentiel de sensibilité, il faut ensuite relancer
 le calcul des règles de sensibilité avec la commande <code class="docutils literal notranslate"><span class="pre">geonature</span> <span class="pre">sensitivity</span> <span class="pre">refresh-rules-cache</span></code>.</p>
 </section>
@@ -2887,6 +2900,10 @@ Pour ce faire il faut modifier les  paramètres <code class="docutils literal no
 <li><p>ATTRIBUTS : permet de voir / créer / modifier / supprimer des attributs de taxons</p></li>
 </ul>
 </section>
+<section id="gestion-du-referentiel-taxonomique">
+<h3>Gestion du référentiel taxonomique<a class="headerlink" href="#gestion-du-referentiel-taxonomique" title="Lien vers cette rubrique">¶</a></h3>
+<p>Le processus de mise à jour du référentiel taxonomique (Taxref) est décrit dans la <a class="reference external" href="https://taxhub.readthedocs.io/fr/latest/update-taxref-version.html">documentation de TaxHub</a></p>
+</section>
 <section id="commandes-taxhub">
 <h3>Commandes TaxHub<a class="headerlink" href="#commandes-taxhub" title="Lien vers cette rubrique">¶</a></h3>
 <p>Depuis la version 2.15, les commandes de TaxHub sont maintenant acessibles depuis la commande <cite>geonature</cite>.</p>
@@ -3554,6 +3571,7 @@ De manière générale, nous séparons les contrôles de données en deux catég
 </li>
 <li><a class="reference internal" href="#module-taxhub">Module TaxHub</a><ul>
 <li><a class="reference internal" href="#gestion-des-permissions">Gestion des permissions</a></li>
+<li><a class="reference internal" href="#gestion-du-referentiel-taxonomique">Gestion du référentiel taxonomique</a></li>
 <li><a class="reference internal" href="#commandes-taxhub">Commandes TaxHub</a></li>
 </ul>
 </li>
@@ -3581,7 +3599,7 @@ De manière générale, nous séparons les contrôles de données en deux catég
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=10905da3"></script>
+</div><script src="_static/documentation_options.js?v=ece14704"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
