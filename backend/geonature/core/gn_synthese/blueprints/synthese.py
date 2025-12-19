@@ -146,12 +146,19 @@ def get_observations_for_web(permissions):
     # does not affect the performance if there is no blurring permissions
     blurring_permissions, precise_permissions = split_blurring_precise_permissions(permissions)
     if not blurring_permissions:
+        # [PN-CUSTOM] Perte de perf en 2.16.4 : v. ticket #3836
         # No need to apply blurring => same path as before blurring feature
+        # obs_query = (
+        #     select(observations_columns)
+        #     .where(VSyntheseForWebApp.the_geom_4326.isnot(None))
+        #     .order_by(VSyntheseForWebApp.date_min.desc(), VSyntheseForWebApp.id_synthese.desc())
+        #     .distinct(VSyntheseForWebApp.id_synthese, VSyntheseForWebApp.date_min)
+        #     .limit(result_limit)
+        # )
         obs_query = (
             select(observations_columns)
             .where(VSyntheseForWebApp.the_geom_4326.isnot(None))
-            .order_by(VSyntheseForWebApp.date_min.desc(), VSyntheseForWebApp.id_synthese.desc())
-            .distinct(VSyntheseForWebApp.id_synthese, VSyntheseForWebApp.date_min)
+            .order_by(VSyntheseForWebApp.date_min.desc())
             .limit(result_limit)
         )
 
