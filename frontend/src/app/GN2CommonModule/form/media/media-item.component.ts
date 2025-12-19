@@ -61,7 +61,8 @@ export class MediaItem {
   }
 
   get hasDiaporama() {
-    return this.diaporamaMedia && this.diaporamaMedia.length > 1;
+    /*[PN-CUSTOM] PR #3840 (zoom onglet média)*/
+    return this.diaporamaMedia && this.diaporamaMedia.length >= 1;
   }
 
   openDiaporamaDialog() {

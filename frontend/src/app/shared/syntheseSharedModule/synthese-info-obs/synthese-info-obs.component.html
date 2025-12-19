@@ -403,7 +403,8 @@
                   target="_blank"
                   [href]="mediaService.href(media)"
                 >
-                  {{ media.title_fr }}
+                  <!-- [PN-CUSTOM] PR #3840 (zoom onglet média) -->
+                  {{ media?.title_fr }}
                 </a>
               </td>
             </tr>
