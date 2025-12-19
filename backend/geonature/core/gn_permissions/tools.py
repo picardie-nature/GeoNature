@@ -175,8 +175,9 @@ def get_scopes_by_action(id_role=None, module_code=None, object_code=None):
 
     :returns : (dict) A dict of the scope for each one of the 6 actions (the char in "CRUVED")
     """
+    # [PN-CUSTOM] Limitation des warnings dev dans les logs : v. ticket #2885
     return {
-        action_code: get_scope(action_code, id_role, module_code, object_code)
+        action_code: get_scope(action_code, id_role, module_code, object_code, bypass_warning=True)
         for action_code in "CRUVED"
     }
 
