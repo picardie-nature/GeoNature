@@ -80,7 +80,13 @@ def get_synthese_data(permissions):
 
     # Sorting parameter
     sort = params.get("sort", "desc")
-    order_by = sa.text(request.args.get("order_by", "last_validation.validation_date", str))
+    # [PN-CUSTOM] Pertes de perfs en 2.16.4 : v. ticket #3821
+    # order_by = sa.text(request.args.get("order_by", "last_validation.validation_date", str))
+    if "order_by" in request.args:
+        order_by = sa.text(request.args["order_by"])
+    else:
+        order_by = ""
+
     sorting_active = sort != "" and order_by != ""
     # Pagination parameter
     page = int(params.get("page", 0))
